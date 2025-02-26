@@ -1,21 +1,26 @@
 const { response } = require('express')
+const jwt = require("jsonwebtoken");
 const Event = require('../models/events')
 
-const getEvents = async ( _ ,res =response)=>{
+const getEvents = async (req, res = response) => {
     try {
-        const events = await Event.find().populate('user',"name")
+        const token = req.header("x-token");
+
+        const {id} = jwt.verify(token, process.env.SECRETE_JWT_SEED);
+        const events = await Event.find({ user: id }).populate("user", "name");
+
         res.status(200).json({
             ok: true,
             msg: events
-        })
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({
-            ok:false,
+            ok: false,
             msg: "Something went wrong"
-        })
+        });
     }
-}
+};
 
 const createEvent = async (req,res =response)=>{
 
